@@ -1,4 +1,10 @@
+using Microsoft.EntityFrameworkCore;
+using TiendaApi.Data;
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<TiendaDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("ConexionTienda")));
 
 // Add services to the container.
 
