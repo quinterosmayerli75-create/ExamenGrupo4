@@ -32,15 +32,37 @@ namespace TiendaApi.Migrations
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Categorias");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Descripcion = "Dispositivos electrónicos",
+                            Nombre = "Electrónica"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Descripcion = "Prendas de vestir",
+                            Nombre = "Ropa"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Descripcion = "Productos para el hogar",
+                            Nombre = "Hogar"
+                        });
                 });
 
             modelBuilder.Entity("TiendaApi.Models.Cliente", b =>
@@ -53,17 +75,23 @@ namespace TiendaApi.Migrations
 
                     b.Property<string>("Correo")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Telefono")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Correo")
+                        .IsUnique();
 
                     b.ToTable("Clientes");
                 });
@@ -83,6 +111,7 @@ namespace TiendaApi.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("PrecioUnitario")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ProductoId")
@@ -110,7 +139,8 @@ namespace TiendaApi.Migrations
 
                     b.Property<string>("Estado")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime2");
@@ -135,13 +165,16 @@ namespace TiendaApi.Migrations
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<decimal>("Precio")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Stock")
@@ -152,6 +185,98 @@ namespace TiendaApi.Migrations
                     b.HasIndex("CategoriaId");
 
                     b.ToTable("Productos");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CategoriaId = 1,
+                            Descripcion = "Audífonos inalámbricos",
+                            Nombre = "Audífonos",
+                            Precio = 120m,
+                            Stock = 20
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CategoriaId = 1,
+                            Descripcion = "Teclado USB",
+                            Nombre = "Teclado",
+                            Precio = 150m,
+                            Stock = 15
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CategoriaId = 1,
+                            Descripcion = "Mouse óptico",
+                            Nombre = "Mouse",
+                            Precio = 70m,
+                            Stock = 25
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CategoriaId = 2,
+                            Descripcion = "Camiseta de algodón",
+                            Nombre = "Camiseta",
+                            Precio = 60m,
+                            Stock = 30
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CategoriaId = 2,
+                            Descripcion = "Pantalón casual",
+                            Nombre = "Pantalón",
+                            Precio = 140m,
+                            Stock = 12
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CategoriaId = 2,
+                            Descripcion = "Chaqueta ligera",
+                            Nombre = "Chaqueta",
+                            Precio = 220m,
+                            Stock = 8
+                        },
+                        new
+                        {
+                            Id = 7,
+                            CategoriaId = 3,
+                            Descripcion = "Lámpara de escritorio",
+                            Nombre = "Lámpara",
+                            Precio = 95m,
+                            Stock = 10
+                        },
+                        new
+                        {
+                            Id = 8,
+                            CategoriaId = 3,
+                            Descripcion = "Almohada suave",
+                            Nombre = "Almohada",
+                            Precio = 50m,
+                            Stock = 18
+                        },
+                        new
+                        {
+                            Id = 9,
+                            CategoriaId = 3,
+                            Descripcion = "Taza de cerámica",
+                            Nombre = "Taza",
+                            Precio = 25m,
+                            Stock = 40
+                        },
+                        new
+                        {
+                            Id = 10,
+                            CategoriaId = 1,
+                            Descripcion = "Parlante Bluetooth",
+                            Nombre = "Parlante",
+                            Precio = 180m,
+                            Stock = 7
+                        });
                 });
 
             modelBuilder.Entity("TiendaApi.Models.Usuario", b =>
@@ -164,11 +289,13 @@ namespace TiendaApi.Migrations
 
                     b.Property<string>("Correo")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -176,9 +303,13 @@ namespace TiendaApi.Migrations
 
                     b.Property<string>("Rol")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Correo")
+                        .IsUnique();
 
                     b.ToTable("Usuarios");
                 });
@@ -194,7 +325,7 @@ namespace TiendaApi.Migrations
                     b.HasOne("TiendaApi.Models.Producto", "Producto")
                         .WithMany("DetallesPedido")
                         .HasForeignKey("ProductoId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Pedido");
@@ -207,7 +338,7 @@ namespace TiendaApi.Migrations
                     b.HasOne("TiendaApi.Models.Cliente", "Cliente")
                         .WithMany("Pedidos")
                         .HasForeignKey("ClienteId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Cliente");
@@ -218,7 +349,7 @@ namespace TiendaApi.Migrations
                     b.HasOne("TiendaApi.Models.Categoria", "Categoria")
                         .WithMany("Productos")
                         .HasForeignKey("CategoriaId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Categoria");
