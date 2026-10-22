@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Estudiante\\Desktop\\TiendaApi\\TiendaApi\\TiendaApi.csproj": {}
+    "C:\\Users\\Estudiante\\ExamenGrupo4\\TiendaApi\\TiendaApi.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Estudiante\\Desktop\\TiendaApi\\TiendaApi\\TiendaApi.csproj": {
+    "C:\\Users\\Estudiante\\ExamenGrupo4\\TiendaApi\\TiendaApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Estudiante\\Desktop\\TiendaApi\\TiendaApi\\TiendaApi.csproj",
+        "projectUniqueName": "C:\\Users\\Estudiante\\ExamenGrupo4\\TiendaApi\\TiendaApi.csproj",
         "projectName": "TiendaApi",
-        "projectPath": "C:\\Users\\Estudiante\\Desktop\\TiendaApi\\TiendaApi\\TiendaApi.csproj",
+        "projectPath": "C:\\Users\\Estudiante\\ExamenGrupo4\\TiendaApi\\TiendaApi.csproj",
         "packagesPath": "C:\\Users\\Estudiante\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Estudiante\\Desktop\\TiendaApi\\TiendaApi\\obj\\",
+        "outputPath": "C:\\Users\\Estudiante\\ExamenGrupo4\\TiendaApi\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -45,7 +45,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.400"
+        "SdkAnalysisLevel": "11.0.100"
       },
       "frameworks": {
         "net10.0": {
@@ -98,7 +98,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400-preview.0.26322.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\11.0.100-rc.2.26504.105/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
