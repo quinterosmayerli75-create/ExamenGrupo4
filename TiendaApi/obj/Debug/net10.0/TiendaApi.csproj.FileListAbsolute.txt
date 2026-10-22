@@ -166,4 +166,6 @@ C:\Users\Estudiante\Desktop\TiendaApi\TiendaApi\obj\Debug\net10.0\refint\TiendaA
 C:\Users\Estudiante\Desktop\TiendaApi\TiendaApi\obj\Debug\net10.0\TiendaApi.pdb
 C:\Users\Estudiante\Desktop\TiendaApi\TiendaApi\obj\Debug\net10.0\TiendaApi.genruntimeconfig.cache
 C:\Users\Estudiante\Desktop\TiendaApi\TiendaApi\obj\Debug\net10.0\ref\TiendaApi.dll
-C:\Users\Estudiante\Desktop\TiendaApi\TiendaApi\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
+C:\Users\Estudiante\Desktop\TiendaApi\TiendaApi\bin\Debug\net10.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\Estudiante\Desktop\TiendaApi\TiendaApi\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\Estudiante\Desktop\TiendaApi\TiendaApi\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerUI.dll
