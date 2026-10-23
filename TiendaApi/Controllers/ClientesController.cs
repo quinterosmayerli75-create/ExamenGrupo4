@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TiendaApi.Data;
+using TiendaApi.DTOs;
 using TiendaApi.Models;
 
 namespace TiendaApi.Controllers
@@ -18,14 +19,22 @@ namespace TiendaApi.Controllers
 
         // GET: api/Clientes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Cliente>>> GetClientes()
+        public async Task<ActionResult<IEnumerable<ClienteDTO>>> GetClientes()
         {
-            return await _context.Clientes.ToListAsync();
+            return await _context.Clientes
+                .Select(c => new ClienteDTO
+                {
+                    Id = c.Id,
+                    Nombre = c.Nombre,
+                    Correo = c.Correo,
+                    Telefono = c.Telefono
+                })
+                .ToListAsync();
         }
 
         // GET: api/Clientes/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Cliente>> GetCliente(int id)
+        public async Task<ActionResult<ClienteDTO>> GetCliente(int id)
         {
             var cliente = await _context.Clientes.FindAsync(id);
 
@@ -34,50 +43,63 @@ namespace TiendaApi.Controllers
                 return NotFound(new { mensaje = "El cliente no fue encontrado." });
             }
 
-            return cliente;
+            return new ClienteDTO
+            {
+                Id = cliente.Id,
+                Nombre = cliente.Nombre,
+                Correo = cliente.Correo,
+                Telefono = cliente.Telefono
+            };
         }
 
         // POST: api/Clientes
         [HttpPost]
-        public async Task<ActionResult<Cliente>> PostCliente(Cliente cliente)
+        public async Task<ActionResult<ClienteDTO>> PostCliente(ClienteDTO dto)
         {
-            if (!ModelState.IsValid)
+            bool correoExiste = await _context.Clientes.AnyAsync(c => c.Correo == dto.Correo);
+            if (correoExiste)
             {
-                return BadRequest(ModelState);
+                return Conflict(new { mensaje = "Ya existe un cliente con ese correo." });
             }
+            var cliente = new Cliente
+            {
+                Nombre = dto.Nombre,
+                Correo = dto.Correo,
+                Telefono = dto.Telefono ?? string.Empty
+            };
 
             _context.Clientes.Add(cliente);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetCliente), new { id = cliente.Id }, cliente);
+            dto.Id = cliente.Id;
+            return CreatedAtAction(nameof(GetCliente), new { id = cliente.Id }, dto);
         }
 
         // PUT: api/Clientes/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCliente(int id, Cliente cliente)
+        public async Task<IActionResult> PutCliente(int id, ClienteDTO dto)
         {
-            if (id != cliente.Id)
+            if (id != dto.Id)
             {
                 return BadRequest(new { mensaje = "El ID del cliente no coincide." });
             }
 
-            _context.Entry(cliente).State = EntityState.Modified;
+            var cliente = await _context.Clientes.FindAsync(id);
+            if (cliente == null)
+            {
+                return NotFound(new { mensaje = "El cliente no existe." });
+            }
+            bool correoEnUso = await _context.Clientes.AnyAsync(c => c.Correo == dto.Correo && c.Id != id);
+            if (correoEnUso)
+            {
+                return Conflict(new { mensaje = "Ya existe otro cliente con ese correo." });
+            }
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_context.Clientes.Any(e => e.Id == id))
-                {
-                    return NotFound(new { mensaje = "El cliente no existe." });
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            cliente.Nombre = dto.Nombre;
+            cliente.Correo = dto.Correo;
+            cliente.Telefono = dto.Telefono ?? string.Empty;
+
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
