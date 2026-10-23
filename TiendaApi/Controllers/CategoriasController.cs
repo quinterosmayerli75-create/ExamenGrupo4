@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TiendaApi.Data;
 using TiendaApi.DTOs;
@@ -8,6 +9,7 @@ namespace TiendaApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CategoriasController : ControllerBase
     {
         private readonly TiendaDbContext _context;
@@ -52,6 +54,7 @@ namespace TiendaApi.Controllers
 
         // POST: api/Categorias
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<CategoriaDTO>> PostCategoria(CategoriaDTO dto)
         {
             var categoria = new Categoria
@@ -69,6 +72,7 @@ namespace TiendaApi.Controllers
 
         // PUT: api/Categorias/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutCategoria(int id, CategoriaDTO dto)
         {
             if (id != dto.Id)
@@ -92,6 +96,7 @@ namespace TiendaApi.Controllers
 
         // DELETE: api/Categorias/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteCategoria(int id)
         {
             var categoria = await _context.Categorias.FindAsync(id);

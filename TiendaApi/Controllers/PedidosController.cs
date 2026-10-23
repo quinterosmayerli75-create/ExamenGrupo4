@@ -1,13 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TiendaApi.Data;
 using TiendaApi.DTOs;
 using TiendaApi.Models;
 
+
 namespace TiendaApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PedidosController : ControllerBase
     {
         private readonly TiendaDbContext _context;
@@ -132,6 +135,7 @@ namespace TiendaApi.Controllers
 
         // PUT: api/Pedidos/5/estado
         [HttpPut("{id}/estado")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutEstado(int id, PedidoEstadoDTO dto)
         {
             var estadosValidos = new[] { "Pendiente", "Pagado", "Enviado", "Entregado" };
@@ -156,6 +160,7 @@ namespace TiendaApi.Controllers
 
         // DELETE: api/Pedidos/5 (Eliminar o cancelar pedido y devolver stock)
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeletePedido(int id)
         {
             var pedido = await _context.Pedidos

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using TiendaApi.Data;
 using TiendaApi.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TiendaApi.Controllers
 {

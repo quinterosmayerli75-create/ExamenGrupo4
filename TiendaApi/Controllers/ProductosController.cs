@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TiendaApi.Data;
 using TiendaApi.DTOs;
@@ -8,6 +9,7 @@ namespace TiendaApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProductosController : ControllerBase
     {
         private readonly TiendaDbContext _context;
@@ -62,6 +64,7 @@ namespace TiendaApi.Controllers
 
         // POST: api/Productos
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ProductoDTO>> PostProducto(ProductoDTO dto)
         {
             // Comprobar que la categoría asignada realmente exista en la base de datos
@@ -90,6 +93,7 @@ namespace TiendaApi.Controllers
 
         // PUT: api/Productos/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutProducto(int id, ProductoDTO dto)
         {
             if (id != dto.Id)
@@ -122,6 +126,7 @@ namespace TiendaApi.Controllers
 
         // DELETE: api/Productos/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteProducto(int id)
         {
             var producto = await _context.Productos.FindAsync(id);

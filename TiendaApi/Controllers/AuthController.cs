@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 using TiendaApi.Data;
 using TiendaApi.DTOs;
 using TiendaApi.Models;
+using TiendaApi.Services;
 
 namespace TiendaApi.Controllers
 {
@@ -17,11 +17,13 @@ namespace TiendaApi.Controllers
     {
         private readonly TiendaDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly PasswordService _passwordService;
 
-        public AuthController(TiendaDbContext context, IConfiguration configuration)
+        public AuthController(TiendaDbContext context, IConfiguration configuration, PasswordService passwordService)
         {
             _context = context;
             _configuration = configuration;
+            _passwordService = passwordService;
         }
 
         // POST: api/Auth/registro
@@ -34,14 +36,14 @@ namespace TiendaApi.Controllers
                 return BadRequest(new { mensaje = "El correo electrónico ya está registrado." });
             }
 
-            using var hmac = new HMACSHA512();
+            // El rol lo asigna el servidor: todo registro público es "Cliente"
             var usuario = new Usuario
             {
                 Nombre = dto.NombreUsuario,
                 Correo = dto.Email,
-                PasswordHash = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(dto.Password))),
-                Rol = dto.Rol
+                Rol = "Cliente"
             };
+            usuario.PasswordHash = _passwordService.HashPassword(usuario, dto.Password);
 
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
@@ -54,24 +56,37 @@ namespace TiendaApi.Controllers
         public async Task<IActionResult> Login(LoginDTO dto)
         {
             var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == dto.Email);
-            if (usuario == null)
+
+            // Mismo mensaje para correo inexistente y contraseña incorrecta
+            if (usuario == null || !_passwordService.VerifyPassword(usuario, dto.Password))
             {
-                return Unauthorized(new { mensaje = "Credenciales inválidas (correo no encontrado)." });
+                return Unauthorized(new { mensaje = "Correo o contraseña incorrectos." });
             }
 
             string token = GenerarTokenJwt(usuario);
 
-            return Ok(new { token, mensaje = "Inicio de sesión exitoso." });
+            return Ok(new
+            {
+                token,
+                mensaje = "Inicio de sesión exitoso.",
+                usuario = new UsuarioDTO
+                {
+                    Id = usuario.Id,
+                    Nombre = usuario.Nombre,
+                    Correo = usuario.Correo,
+                    Rol = usuario.Rol
+                }
+            });
         }
 
         private string GenerarTokenJwt(Usuario usuario)
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-                new Claim(ClaimTypes.Name, usuario.Nombre),
-                new Claim(ClaimTypes.Email, usuario.Correo),
-                new Claim(ClaimTypes.Role, string.IsNullOrEmpty(usuario.Rol) ? "Cliente" : usuario.Rol)
+                new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
+                new Claim("name", usuario.Nombre),
+                new Claim(JwtRegisteredClaimNames.Email, usuario.Correo),
+                new Claim("role", string.IsNullOrEmpty(usuario.Rol) ? "Cliente" : usuario.Rol)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
