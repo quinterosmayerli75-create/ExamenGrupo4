@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TiendaApi.Data;
+using TiendaApi.DTOs;
 using TiendaApi.Models;
 
 namespace TiendaApi.Controllers
@@ -18,16 +19,25 @@ namespace TiendaApi.Controllers
 
         // GET: api/Productos
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Producto>>> GetProductos()
+        public async Task<ActionResult<IEnumerable<ProductoDTO>>> GetProductos()
         {
             return await _context.Productos
-                .Include(p => p.Categoria) // Incluye los datos de la categoría relacionada
+                .Select(p => new ProductoDTO
+                {
+                    Id = p.Id,
+                    Nombre = p.Nombre,
+                    Descripcion = p.Descripcion,
+                    Precio = p.Precio,
+                    Stock = p.Stock,
+                    CategoriaId = p.CategoriaId,
+                    CategoriaNombre = p.Categoria != null ? p.Categoria.Nombre : null
+                })
                 .ToListAsync();
         }
 
         // GET: api/Productos/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Producto>> GetProducto(int id)
+        public async Task<ActionResult<ProductoDTO>> GetProducto(int id)
         {
             var producto = await _context.Productos
                 .Include(p => p.Categoria)
@@ -38,63 +48,74 @@ namespace TiendaApi.Controllers
                 return NotFound(new { mensaje = "El producto no fue encontrado." });
             }
 
-            return producto;
+            return new ProductoDTO
+            {
+                Id = producto.Id,
+                Nombre = producto.Nombre,
+                Descripcion = producto.Descripcion,
+                Precio = producto.Precio,
+                Stock = producto.Stock,
+                CategoriaId = producto.CategoriaId,
+                CategoriaNombre = producto.Categoria?.Nombre
+            };
         }
 
         // POST: api/Productos
         [HttpPost]
-        public async Task<ActionResult<Producto>> PostProducto(Producto producto)
+        public async Task<ActionResult<ProductoDTO>> PostProducto(ProductoDTO dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             // Comprobar que la categoría asignada realmente exista en la base de datos
-            var categoriaExiste = await _context.Categorias.AnyAsync(c => c.Id == producto.CategoriaId);
-            if (!categoriaExiste)
+            var categoria = await _context.Categorias.FindAsync(dto.CategoriaId);
+            if (categoria == null)
             {
                 return BadRequest(new { mensaje = "La categoría especificada no existe." });
             }
+
+            var producto = new Producto
+            {
+                Nombre = dto.Nombre,
+                Descripcion = dto.Descripcion ?? string.Empty,
+                Precio = dto.Precio,
+                Stock = dto.Stock,
+                CategoriaId = dto.CategoriaId
+            };
 
             _context.Productos.Add(producto);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetProducto), new { id = producto.Id }, producto);
+            dto.Id = producto.Id;
+            dto.CategoriaNombre = categoria.Nombre;
+            return CreatedAtAction(nameof(GetProducto), new { id = producto.Id }, dto);
         }
 
         // PUT: api/Productos/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProducto(int id, Producto producto)
+        public async Task<IActionResult> PutProducto(int id, ProductoDTO dto)
         {
-            if (id != producto.Id)
+            if (id != dto.Id)
             {
                 return BadRequest(new { mensaje = "El ID del producto no coincide." });
             }
 
-            var categoriaExiste = await _context.Categorias.AnyAsync(c => c.Id == producto.CategoriaId);
+            var producto = await _context.Productos.FindAsync(id);
+            if (producto == null)
+            {
+                return NotFound(new { mensaje = "El producto no existe." });
+            }
+
+            var categoriaExiste = await _context.Categorias.AnyAsync(c => c.Id == dto.CategoriaId);
             if (!categoriaExiste)
             {
                 return BadRequest(new { mensaje = "La categoría especificada no existe." });
             }
 
-            _context.Entry(producto).State = EntityState.Modified;
+            producto.Nombre = dto.Nombre;
+            producto.Descripcion = dto.Descripcion ?? string.Empty;
+            producto.Precio = dto.Precio;
+            producto.Stock = dto.Stock;
+            producto.CategoriaId = dto.CategoriaId;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_context.Productos.Any(e => e.Id == id))
-                {
-                    return NotFound(new { mensaje = "El producto no existe." });
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
@@ -110,7 +131,6 @@ namespace TiendaApi.Controllers
             }
 
             // Validar que el producto no esté ligado a ningún DetallePedido existente
-            // Cambiar _context.DetallePedido por el nombre que tenga en el DbContext de tu compañera, por ejemplo:
             bool estaEnPedidos = await _context.DetallesPedido.AnyAsync(dp => dp.ProductoId == id);
             if (estaEnPedidos)
             {
