@@ -2,7 +2,7 @@
 
 Sistema de tienda con arquitectura **cliente-servidor**. El backend es una API REST desarrollada con **ASP.NET Core Web API**, que será consumida por una aplicación web y una aplicación móvil.
 
-> Estado actual: **backend completo** (rama `backend`). Cliente web y cliente móvil: _pendientes de documentar_.
+> Estado de las ramas: `backend` contiene la API; `movil` integra esta base con el cliente móvil Expo. El cliente web sigue pendiente.
 
 ## Tecnologías
 
@@ -13,6 +13,7 @@ Sistema de tienda con arquitectura **cliente-servidor**. El backend es una API R
 | Base de datos | SQL Server LocalDB (`TiendaDB`) |
 | Seguridad | JWT (JSON Web Tokens) con roles |
 | Documentación y pruebas | Swagger |
+| Cliente móvil | React Native / Expo Go (SDK 57) |
 
 
 
@@ -156,4 +157,9 @@ El servidor valida que existan el cliente y los productos, comprueba el stock, d
 
 - Rama `main`: versión integrada.
 - Rama `backend`: desarrollo del backend, trabajado en equipo con commits frecuentes.
+- Rama `movil`: cliente React Native con Expo Go y la base del backend.
+
+## Cliente móvil
+
+La aplicación Android está en [`mobile/`](mobile/) y consume la API de `TiendaApi`. Para configurar la IP local del backend y abrirla con Expo Go, sigue la [guía de ejecución móvil](mobile/README.md).
 

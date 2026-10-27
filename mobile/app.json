@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Tienda Grupo 4",
+    "slug": "tienda-grupo-4",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "android": {
+      "package": "com.grupo4.tienda"
+    }
+  }
+}
