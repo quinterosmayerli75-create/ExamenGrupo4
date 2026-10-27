@@ -9,6 +9,7 @@ namespace TiendaApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class DetallesPedidoController : ControllerBase
     {
         private readonly TiendaDbContext _context;

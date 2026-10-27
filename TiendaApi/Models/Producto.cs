@@ -14,7 +14,7 @@ namespace TiendaApi.Models
         [StringLength(500)]
         public string Descripcion { get; set; } = string.Empty;
 
-        [Range(typeof(decimal), "0.01", "999999999")]
+        [Range(typeof(decimal), "0.01", "999999999", ParseLimitsInInvariantCulture = true)]
         public decimal Precio { get; set; }
 
         [Range(0, int.MaxValue)]

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
 using TiendaApi.Data;
 using TiendaApi.DTOs;
 using TiendaApi.Models;
@@ -55,7 +56,15 @@ namespace TiendaApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PedidoDTO>>> GetPedidos()
         {
-            var pedidos = await ConsultaPedidos().ToListAsync();
+            var consulta = ConsultaPedidos();
+            if (!User.IsInRole("Admin"))
+            {
+                var correo = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
+                if (string.IsNullOrWhiteSpace(correo)) return Forbid();
+                consulta = consulta.Where(p => p.Cliente != null && p.Cliente.Correo == correo);
+            }
+
+            var pedidos = await consulta.ToListAsync();
             return Ok(pedidos.Select(ToDto).ToList());
         }
 
@@ -70,18 +79,28 @@ namespace TiendaApi.Controllers
                 return NotFound(new { mensaje = "El pedido no fue encontrado." });
             }
 
+            var correo = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
+            if (!User.IsInRole("Admin") && !string.Equals(pedido.Cliente?.Correo, correo, StringComparison.OrdinalIgnoreCase))
+            {
+                return Forbid();
+            }
+
             return ToDto(pedido);
         }
 
         // POST: api/Pedidos
         [HttpPost]
+        [Authorize(Roles = "Cliente")]
         public async Task<ActionResult<PedidoDTO>> PostPedido(PedidoDTO dto)
         {
-            // Validar que el cliente exista
-            var clienteExiste = await _context.Clientes.AnyAsync(c => c.Id == dto.ClienteId);
+            var correo = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
+            if (string.IsNullOrWhiteSpace(correo)) return Forbid();
+
+            // El cliente de un pedido se obtiene de la identidad autenticada, no del formulario.
+            var clienteExiste = await _context.Clientes.AnyAsync(c => c.Id == dto.ClienteId && c.Correo == correo);
             if (!clienteExiste)
             {
-                return BadRequest(new { mensaje = "El cliente especificado no existe." });
+                return Forbid();
             }
 
             // Si un producto viene repetido, se suman sus cantidades

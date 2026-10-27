@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
 using TiendaApi.Data;
 using TiendaApi.DTOs;
 using TiendaApi.Models;
@@ -22,6 +23,7 @@ namespace TiendaApi.Controllers
 
         // GET: api/Clientes
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<ClienteDTO>>> GetClientes()
         {
             return await _context.Clientes
@@ -35,6 +37,25 @@ namespace TiendaApi.Controllers
                 .ToListAsync();
         }
 
+        // GET: api/Clientes/mi-perfil (perfil asociado al correo del token)
+        [HttpGet("mi-perfil")]
+        public async Task<ActionResult<ClienteDTO>> GetMiPerfil()
+        {
+            var correo = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
+            if (string.IsNullOrWhiteSpace(correo)) return Forbid();
+
+            var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.Correo == correo);
+            if (cliente == null) return NotFound(new { mensaje = "Todavía no tienes un perfil de cliente." });
+
+            return new ClienteDTO
+            {
+                Id = cliente.Id,
+                Nombre = cliente.Nombre,
+                Correo = cliente.Correo,
+                Telefono = cliente.Telefono
+            };
+        }
+
         // GET: api/Clientes/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ClienteDTO>> GetCliente(int id)
@@ -44,6 +65,12 @@ namespace TiendaApi.Controllers
             if (cliente == null)
             {
                 return NotFound(new { mensaje = "El cliente no fue encontrado." });
+            }
+
+            var correoActual = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
+            if (!User.IsInRole("Admin") && !string.Equals(cliente.Correo, correoActual, StringComparison.OrdinalIgnoreCase))
+            {
+                return Forbid();
             }
 
             return new ClienteDTO
@@ -57,8 +84,13 @@ namespace TiendaApi.Controllers
 
         // POST: api/Clientes
         [HttpPost]
+        [Authorize(Roles = "Cliente")]
         public async Task<ActionResult<ClienteDTO>> PostCliente(ClienteDTO dto)
         {
+            var correoActual = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
+            if (string.IsNullOrWhiteSpace(correoActual)) return Forbid();
+            dto.Correo = correoActual;
+
             bool correoExiste = await _context.Clientes.AnyAsync(c => c.Correo == dto.Correo);
             if (correoExiste)
             {
@@ -91,6 +123,13 @@ namespace TiendaApi.Controllers
             if (cliente == null)
             {
                 return NotFound(new { mensaje = "El cliente no existe." });
+            }
+            var correoActual = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
+            if (!User.IsInRole("Admin") &&
+                (!string.Equals(cliente.Correo, correoActual, StringComparison.OrdinalIgnoreCase) ||
+                 !string.Equals(dto.Correo, correoActual, StringComparison.OrdinalIgnoreCase)))
+            {
+                return Forbid();
             }
             bool correoEnUso = await _context.Clientes.AnyAsync(c => c.Correo == dto.Correo && c.Id != id);
             if (correoEnUso)

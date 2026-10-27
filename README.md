@@ -102,7 +102,7 @@ La API usa **JWT**. Los endpoints, salvo registro e inicio de sesión, exigen un
 2. Iniciar sesión: `POST /api/Auth/login` (devuelve el `token`)
 3. En Swagger, botón **Authorize**: pegar el token **sin** la palabra "Bearer".
 
-Todo usuario registrado recibe el rol `Cliente`. El rol `Admin` se asigna desde la base de datos:
+Todo registro público recibe el rol `Cliente`; la app nunca permite que alguien se asigne permisos de administrador. El rol `Admin` se asigna desde la tabla `Usuarios`:
 
 ```sql
 UPDATE Usuarios SET Rol = 'Admin' WHERE Correo = 'correo@ejemplo.com';
@@ -122,12 +122,14 @@ Después de cambiar el rol hay que volver a iniciar sesión para obtener un toke
 | Categorías | Crear / editar / eliminar | `POST`, `PUT /{id}`, `DELETE /{id}` | Admin |
 | Productos | Listar / obtener | `GET /api/Productos`, `GET /api/Productos/{id}` | Usuario autenticado |
 | Productos | Crear / editar / eliminar | `POST`, `PUT /{id}`, `DELETE /{id}` | Admin |
-| Clientes | Listar / obtener / crear / editar | `GET`, `GET /{id}`, `POST`, `PUT /{id}` | Usuario autenticado |
+| Clientes | Ver o editar el perfil propio | `GET /api/Clientes/mi-perfil`, `GET /{id}`, `POST`, `PUT /{id}` | Cliente autenticado; limitado a su correo |
+| Clientes | Listar todos los perfiles | `GET /api/Clientes` | Admin |
 | Clientes | Eliminar | `DELETE /api/Clientes/{id}` | Admin |
-| Pedidos | Listar / obtener / crear | `GET`, `GET /{id}`, `POST` | Usuario autenticado |
+| Pedidos | Consultar | `GET`, `GET /{id}` | Admin ve todos; cliente solo los suyos |
+| Pedidos | Crear | `POST` | Cliente autenticado; asociado a su propio perfil |
 | Pedidos | Cambiar estado | `PUT /api/Pedidos/{id}/estado` | Admin |
 | Pedidos | Eliminar (devuelve el stock) | `DELETE /api/Pedidos/{id}` | Admin |
-| Detalles de pedido | Listar / obtener (solo lectura) | `GET /api/DetallesPedido`, `GET /{id}` | Usuario autenticado |
+| Detalles de pedido | Listar / obtener (solo lectura) | `GET /api/DetallesPedido`, `GET /{id}` | Admin |
 
 ### Ejemplo: crear un pedido
 

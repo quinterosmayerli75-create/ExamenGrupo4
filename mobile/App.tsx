@@ -14,7 +14,7 @@ import {
   createOrder,
   getCategories,
   getCustomer,
-  getCustomers,
+  getMyCustomer,
   getOrders,
   getProducts,
   updateCustomer,
@@ -22,6 +22,7 @@ import {
 import { BottomTabs, type Tab } from './src/components/BottomTabs';
 import { ProductModal } from './src/components/ProductModal';
 import { AccountScreen } from './src/screens/AccountScreen';
+import { AdminScreen } from './src/screens/AdminScreen';
 import { AuthScreen } from './src/screens/AuthScreen';
 import { CartScreen } from './src/screens/CartScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
@@ -45,10 +46,14 @@ async function findCustomer(token: string, user: User): Promise<Customer | null>
     }
   }
 
-  const customers = await getCustomers(token);
-  const match = customers.find((item) => item.correo.trim().toLocaleLowerCase() === user.correo.trim().toLocaleLowerCase()) ?? null;
-  if (match) await SecureStore.setItemAsync(customerKey(user.id), String(match.id));
-  return match;
+  try {
+    const match = await getMyCustomer(token);
+    await SecureStore.setItemAsync(customerKey(user.id), String(match.id));
+    return match;
+  } catch (error) {
+    if ((error as ApiError).status === 404) return null;
+    throw error;
+  }
 }
 
 export default function App() {
@@ -272,6 +277,15 @@ export default function App() {
 
   if (!session) {
     return <><StatusBar style="dark" /><AuthScreen onAuthenticated={acceptSession} /></>;
+  }
+
+  if (session.user.rol.trim().toLocaleLowerCase() === 'admin') {
+    return (
+      <SafeAreaView style={styles.shell}>
+        <StatusBar style="dark" />
+        <AdminScreen session={session} onSignOut={() => { void signOut(); }} />
+      </SafeAreaView>
+    );
   }
 
   return (

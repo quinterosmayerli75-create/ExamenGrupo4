@@ -37,7 +37,11 @@ Aplicación de tienda para Android, hecha con React Native y Expo Go. Se conecta
 
 4. Escanea el QR con Expo Go. Si la versión de Expo Go instalada no coincide con SDK 57, instala la versión Android de SDK 57 desde [expo.dev/go](https://expo.dev/go).
 
-La primera pantalla permite iniciar sesión o registrar una cuenta. Tras autenticar, el catálogo y las categorías se cargan desde la API. Los pedidos se registran en `POST /api/Pedidos`; el backend valida el stock y calcula los importes.
+La primera pantalla permite iniciar sesión o registrar una cuenta. Tras autenticar, la app usa el rol firmado por la API para abrir el espacio correspondiente: los clientes ven el catálogo y sus pedidos; los administradores entran al panel de control.
+
+El panel Admin usa solo las seis tablas existentes (`Usuarios`, `Clientes`, `Categorias`, `Productos`, `Pedidos` y `DetallesPedido`). Permite consultar indicadores de inventario y pedidos, crear y editar productos y categorías, revisar pedidos y actualizar su estado, y consultar perfiles de cliente. La API valida el rol en cada operación de escritura; el registro público siempre asigna `Cliente`.
+
+Para dar acceso Admin a una cuenta, regístrala primero y asígnale el rol desde la base de datos como se explica en la sección **Autenticación y roles** del README de la raíz. Después cierra la sesión en el móvil e inicia sesión de nuevo para obtener un JWT con el nuevo rol.
 
 ## Funcionalidades
 

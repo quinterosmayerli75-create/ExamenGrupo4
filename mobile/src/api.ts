@@ -72,12 +72,42 @@ export function getProducts(token: string): Promise<Product[]> {
   return request('Productos', { token });
 }
 
+export type ProductInput = Pick<Product, 'nombre' | 'descripcion' | 'precio' | 'stock' | 'categoriaId'>;
+
+export async function saveProduct(token: string, product: ProductInput, id?: number): Promise<void> {
+  await request(id ? `Productos/${id}` : 'Productos', {
+    token,
+    method: id ? 'PUT' : 'POST',
+    body: { id: id ?? 0, ...product },
+  });
+}
+
+export function deleteProduct(token: string, id: number): Promise<void> {
+  return request(`Productos/${id}`, { token, method: 'DELETE' });
+}
+
 export function getCategories(token: string): Promise<Category[]> {
   return request('Categorias', { token });
 }
 
+export async function saveCategory(token: string, category: Pick<Category, 'nombre' | 'descripcion'>, id?: number): Promise<void> {
+  await request(id ? `Categorias/${id}` : 'Categorias', {
+    token,
+    method: id ? 'PUT' : 'POST',
+    body: { id: id ?? 0, ...category },
+  });
+}
+
+export function deleteCategory(token: string, id: number): Promise<void> {
+  return request(`Categorias/${id}`, { token, method: 'DELETE' });
+}
+
 export function getCustomers(token: string): Promise<Customer[]> {
   return request('Clientes', { token });
+}
+
+export function getMyCustomer(token: string): Promise<Customer> {
+  return request('Clientes/mi-perfil', { token });
 }
 
 export function getCustomer(token: string, id: number): Promise<Customer> {
@@ -107,6 +137,10 @@ export function updateCustomer(token: string, customer: Customer, phone: string)
 
 export function getOrders(token: string): Promise<Order[]> {
   return request('Pedidos', { token });
+}
+
+export function updateOrderStatus(token: string, id: number, estado: string): Promise<void> {
+  return request(`Pedidos/${id}/estado`, { token, method: 'PUT', body: { estado } });
 }
 
 export function createOrder(

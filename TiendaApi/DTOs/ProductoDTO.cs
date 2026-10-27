@@ -13,7 +13,7 @@ namespace TiendaApi.DTOs
         [StringLength(500)]
         public string? Descripcion { get; set; }
 
-        [Range(typeof(decimal), "0.01", "999999999", ErrorMessage = "El precio debe ser mayor a 0.")]
+        [Range(typeof(decimal), "0.01", "999999999", ErrorMessage = "El precio debe ser mayor a 0.", ParseLimitsInInvariantCulture = true)]
         public decimal Precio { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = "El stock no puede ser negativo.")]

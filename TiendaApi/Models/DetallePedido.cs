@@ -22,7 +22,7 @@ namespace TiendaApi.Models
         public int Cantidad { get; set; }
 
         [Range(typeof(decimal), "0.01", "999999999",
-            ErrorMessage = "El precio debe ser mayor que cero.")]
+            ErrorMessage = "El precio debe ser mayor que cero.", ParseLimitsInInvariantCulture = true)]
         public decimal PrecioUnitario { get; set; }
     }
 }

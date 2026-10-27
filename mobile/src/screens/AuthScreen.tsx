@@ -73,7 +73,7 @@ export function AuthScreen({ onAuthenticated }: Props) {
         <View style={styles.formCard}>
           <Text style={styles.formTitle}>{isRegistering ? 'Crea tu cuenta' : 'Hola de nuevo'}</Text>
           <Text style={styles.formSubtitle}>
-            {isRegistering ? 'Regístrate para comenzar a comprar.' : 'Inicia sesión para ver la tienda.'}
+            {isRegistering ? 'Regístrate para comenzar a comprar.' : 'Inicia sesión para acceder a tu espacio.'}
           </Text>
           <View style={styles.fields}>
             {isRegistering ? (
