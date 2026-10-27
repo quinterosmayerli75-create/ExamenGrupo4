@@ -6,12 +6,13 @@ import { authService } from "../services/authService";
 export default function RegisterPage() {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    nombreUsuario: "",
-    email: "",
-    password: "",
-    confirmarPassword: "",
-  });
+ const [form, setForm] = useState({
+  nombreUsuario: "",
+  email: "",
+  telefono: "",
+  password: "",
+  confirmarPassword: "",
+});
 
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
@@ -40,11 +41,12 @@ export default function RegisterPage() {
     setCargando(true);
 
     try {
-      await authService.registro(
+            await authService.registro(
         form.nombreUsuario,
         form.email,
-        form.password
-      );
+        form.password,
+        form.telefono
+        );
 
       navigate("/login", { replace: true });
     } catch (err) {
@@ -158,6 +160,26 @@ export default function RegisterPage() {
                 onChange={manejarCambio}
                 required
               />
+            </div>
+            
+            <div className="mb-3">
+            <label htmlFor="registroTelefono" className="form-label">
+                Teléfono *
+            </label>
+
+            <input
+                id="registroTelefono"
+                type="tel"
+                name="telefono"
+                className="form-control"
+                placeholder="Ej. 70707070"
+                minLength={7}
+                maxLength={20}
+                pattern="[0-9+\-()\s]{7,20}"
+                value={form.telefono}
+                onChange={manejarCambio}
+                required
+            />
             </div>
 
             <button

@@ -30,6 +30,7 @@ function mensajeError(err) {
 
 export default function PedidosPage() {
   const esAdmin = authService.esAdmin();
+  const usuarioActual = authService.getUsuario();
 
   const [pedidos, setPedidos] = useState([]);
   const [clientes, setClientes] = useState([]);
@@ -48,6 +49,20 @@ export default function PedidosPage() {
 
   const [error, setError] = useState("");
   const [mensaje, setMensaje] = useState("");
+
+const clienteActual = useMemo(() => {
+    if (!usuarioActual?.correo) return null;
+
+    return clientes.find(
+        (cliente) =>
+        cliente.correo?.trim().toLowerCase() ===
+        usuarioActual.correo.trim().toLowerCase()
+    ) || null;
+    }, [clientes, usuarioActual?.correo]);
+
+    const clientePedidoId = esAdmin
+    ? Number(clienteId)
+    : clienteActual?.id;
 
   async function cargarDatos() {
     setCargando(true);
@@ -167,10 +182,15 @@ export default function PedidosPage() {
     setError("");
     setMensaje("");
 
-    if (!clientes.some((c) => c.id === Number(clienteId))) {
-      setError("Selecciona un cliente válido.");
-      return;
-    }
+    if (
+  !clientePedidoId ||
+  !clientes.some((c) => c.id === clientePedidoId)
+) {
+  setError(
+    "No se encontró un cliente válido para este pedido."
+  );
+  return;
+}
 
     if (detalles.length === 0) {
       setError("Agrega al menos un producto al pedido.");
@@ -180,7 +200,10 @@ export default function PedidosPage() {
     setProcesando(true);
 
     try {
-      const nuevo = await pedidoService.crear(clienteId, detalles);
+      const nuevo = await pedidoService.crear(
+  clientePedidoId,
+  detalles
+);
 
       setMostrarFormulario(false);
       setClienteId("");
@@ -306,25 +329,50 @@ export default function PedidosPage() {
             <h5 className="fw-bold mb-3">Registrar pedido</h5>
 
             <form onSubmit={guardarPedido}>
-              <div className="mb-3">
-                <label htmlFor="clientePedido" className="form-label">
-                  Cliente *
-                </label>
-                <select
-                  id="clientePedido"
-                  className="form-select"
-                  value={clienteId}
-                  onChange={(e) => setClienteId(e.target.value)}
-                  required
-                >
-                  <option value="">Seleccionar cliente</option>
-                  {clientes.map((cliente) => (
-                    <option key={cliente.id} value={cliente.id}>
-                      {cliente.nombre} — {cliente.correo}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              
+<div className="mb-3">
+  <label className="form-label">
+    Cliente *
+  </label>
+
+  {esAdmin ? (
+    <select
+      id="clientePedido"
+      className="form-select"
+      value={clienteId}
+      onChange={(e) => setClienteId(e.target.value)}
+      required
+    >
+      <option value="">Seleccionar cliente</option>
+
+      {clientes.map((cliente) => (
+        <option key={cliente.id} value={cliente.id}>
+          {cliente.nombre} — {cliente.correo}
+        </option>
+      ))}
+    </select>
+  ) : clienteActual ? (
+    <div className="form-control bg-light">
+      <i className="bi bi-person-check me-2 text-success"></i>
+      <strong>{clienteActual.nombre}</strong>
+      <span className="text-muted ms-2">
+        — {clienteActual.correo}
+      </span>
+    </div>
+  ) : (
+    <div className="alert alert-warning mb-0">
+      No encontramos un registro de cliente asociado
+      a tu cuenta. Contacta al administrador.
+    </div>
+  )}
+
+  {!esAdmin && clienteActual && (
+    <small className="text-muted">
+      Los pedidos se registrarán automáticamente a tu nombre.
+    </small>
+  )}
+</div>
+
 
               <h6 className="fw-bold mt-4">Agregar productos</h6>
 
@@ -425,7 +473,11 @@ export default function PedidosPage() {
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  disabled={procesando || detalles.length === 0}
+                                disabled={
+                procesando ||
+                detalles.length === 0 ||
+                !clientePedidoId
+                }
                 >
                   {procesando ? "Guardando..." : "Confirmar pedido"}
                 </button>

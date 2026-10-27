@@ -16,15 +16,16 @@ export const authService = {
     return response.data;
   },
 
-  async registro(nombreUsuario, email, password) {
-    const response = await api.post("/api/Auth/registro", {
-      nombreUsuario,
-      email,
-      password,
-    });
+  async registro(nombreUsuario, email, password, telefono) {
+  const response = await api.post("/api/Auth/registro", {
+    nombreUsuario,
+    email,
+    password,
+    telefono,
+  });
 
-    return response.data;
-  },
+  return response.data;
+},
 
   logout() {
     sessionStorage.removeItem("token");
